@@ -133,6 +133,17 @@
         .required {
             color: #dc3545;
         }
+
+        .region-badge {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #856404;
+            margin-bottom: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -141,6 +152,10 @@
             <div class="logo">☁️</div>
             <h2>PROJET IAC SONATEL</h2>
             <p>Création d'instance EC2 automatisée</p>
+        </div>
+
+        <div class="region-badge">
+            📍 <strong>Région:</strong> eu-north-1 (Stockholm)
         </div>
 
         <div class="info-box">
@@ -169,22 +184,22 @@
                 </label>
                 <select id="instance_os" name="instance_os" required>
                     <option value="">-- Choisir une image --</option>
-                    <option value="ami-05fcfb9614772f051">🐧 Amazon Linux 2</option>
-                    <option value="ami-01f23391a59163da9">🐧 Ubuntu 22.04 LTS</option>
-                    <option value="ami-0548d28d4f7ec72c5">🐧 Debian 12 (Bookworm)</option>
-                    <option value="ami-0989038dff76173d3">🎩 Red Hat Enterprise Linux 9</option>
+                    <option value="ami-0fe8bec493a81c7da">🐧 Amazon Linux 2023 (Recommandé)</option>
+                    <option value="ami-0705384c0b33c194c">🐧 Ubuntu 22.04 LTS</option>
+                    <option value="ami-064087b8d355e70c1">🐧 Debian 12</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="instance_os">
-                    Système d'exploitation <span class="required">*</span>
+                <label for="instance_size">
+                    Taille de l'instance <span class="required">*</span>
                 </label>
-                <select id="instance_os" name="instance_os" required>
-                    <option value="">-- Choisir une image --</option>
-                    <option value="ami-0d421d84814b7d51c">🐧 Amazon Linux 2023 (Recommandé)</option>
-                    <option value="ami-0d64bb532e0502c46">🐧 Ubuntu 22.04 LTS</option>
-                    <option value="ami-0c38b837cd80aacf8">🐧 Debian 12</option>
+                <select id="instance_size" name="instance_size" required>
+                    <option value="">-- Choisir la taille --</option>
+                    <option value="t3.micro">💻 t3.micro (1 vCPU, 1 GB RAM) - Free Tier</option>
+                    <option value="t3.small">💻 t3.small (2 vCPU, 2 GB RAM)</option>
+                    <option value="t3.medium">💻 t3.medium (2 vCPU, 4 GB RAM)</option>
+                    <option value="t3.large">🖥️ t3.large (2 vCPU, 8 GB RAM)</option>
                 </select>
             </div>
 
