@@ -12,9 +12,9 @@ on:
         required: true
         type: choice
         options:
-          - ami-0d421d84814b7d51c  # Amazon Linux 2023 (eu-west-1)
-          - ami-0d64bb532e0502c46  # Ubuntu 22.04 LTS (eu-west-1)
-          - ami-0c38b837cd80aacf8  # Debian 12 (eu-west-1)
+          - ami-0fe8bec493a81c7da  # Amazon Linux 2023 (eu-north-1)
+          - ami-0705384c0b33c194c  # Ubuntu 22.04 LTS (eu-north-1)
+          - ami-064087b8d355e70c1  # Debian 12 (eu-north-1)
       instance_size:
         description: 'Type d''instance'
         required: true
@@ -37,7 +37,7 @@ env:
   TF_VAR_instance_os: ${{ github.event.inputs.instance_os }}
   TF_VAR_instance_size: ${{ github.event.inputs.instance_size }}
   TF_VAR_instance_env: ${{ github.event.inputs.instance_env }}
-  AWS_REGION: eu-west-1
+  AWS_REGION: eu-north-1
 
 jobs:
   terraform:
@@ -128,6 +128,7 @@ jobs:
         echo "- **Type:** ${{ github.event.inputs.instance_size }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Environment:** ${{ github.event.inputs.instance_env }}" >> $GITHUB_STEP_SUMMARY
         echo "- **AMI:** ${{ github.event.inputs.instance_os }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Region:** eu-north-1 (Stockholm)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 🔧 Terraform Outputs:" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
