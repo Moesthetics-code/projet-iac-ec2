@@ -1,0 +1,53 @@
+stages:
+  - validate
+  - plan
+  - apply
+
+variables:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "0"
+  AWS_DEFAULT_REGION: "eu-west-1"
+  TF_VAR_instance_name: "${INSTANCE_NAME}"
+  TF_VAR_instance_os: "${INSTANCE_OS}"
+  TF_VAR_instance_size: "${INSTANCE_SIZE}"
+  TF_VAR_instance_env: "${INSTANCE_ENV}"
+
+image: alpine:latest
+
+before_script:
+  - apk add --no-cache bash curl jq
+  - rm -rf terraform        
+  - curl -LO https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip
+  - unzip terraform_1.8.5_linux_amd64.zip
+  - mv terraform /usr/local/bin/
+  - terraform version
+  - pwd
+  - ls -lrt
+
+validate:
+  stage: validate
+  script: 
+    - cd infra
+    - terraform init -input=false
+    - terraform validate
+
+plan:
+  stage: plan
+  script:
+    - cd infra
+    - terraform init -input=false
+    - terraform plan -out=tfplan
+  artifacts:
+    paths:
+      - infra/tfplan
+    expire_in: 1 hour
+
+apply:
+  stage: apply
+  dependencies:
+    - plan
+  when: manual
+  script:
+    - cd infra
+    - terraform init -input=false
+    - terraform apply -auto-approve tfplan

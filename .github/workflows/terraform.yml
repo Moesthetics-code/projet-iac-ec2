@@ -1,0 +1,135 @@
+name: Terraform EC2 Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance_name:
+        description: 'Nom de l''instance'
+        required: true
+        type: string
+      instance_os:
+        description: 'AMI ID'
+        required: true
+        type: choice
+        options:
+          - ami-0d421d84814b7d51c  # Amazon Linux 2023 (eu-west-1)
+          - ami-0d64bb532e0502c46  # Ubuntu 22.04 LTS (eu-west-1)
+          - ami-0c38b837cd80aacf8  # Debian 12 (eu-west-1)
+      instance_size:
+        description: 'Type d''instance'
+        required: true
+        type: choice
+        options:
+          - t3.micro
+          - t3.small
+          - t3.medium
+      instance_env:
+        description: 'Environnement'
+        required: true
+        type: choice
+        options:
+          - dev
+          - preprod
+          - prod
+
+env:
+  TF_VAR_instance_name: ${{ github.event.inputs.instance_name }}
+  TF_VAR_instance_os: ${{ github.event.inputs.instance_os }}
+  TF_VAR_instance_size: ${{ github.event.inputs.instance_size }}
+  TF_VAR_instance_env: ${{ github.event.inputs.instance_env }}
+  AWS_REGION: eu-west-1
+
+jobs:
+  terraform:
+    name: 'Terraform Deployment'
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./infra
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Verify AWS Credentials
+      run: |
+        aws sts get-caller-identity
+        echo "✅ AWS credentials configured successfully"
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.8.5
+    
+    - name: Terraform Format Check
+      run: terraform fmt -check
+      continue-on-error: true
+    
+    - name: Remove Terraform Lock File
+      run: rm -f .terraform.lock.hcl
+      continue-on-error: true
+    
+    - name: Terraform Init
+      run: terraform init -upgrade
+    
+    - name: Terraform Validate
+      run: terraform validate
+    
+    - name: Terraform Plan
+      run: |
+        terraform plan -out=tfplan -no-color
+        echo "📋 Plan Summary:"
+        terraform show -no-color tfplan
+      
+    - name: Upload Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan
+        path: infra/tfplan
+        retention-days: 1
+    
+    - name: Terraform Apply
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        echo "🚀 Applying Terraform configuration..."
+        terraform apply -auto-approve tfplan
+        echo "✅ Infrastructure deployed successfully!"
+    
+    - name: Terraform Output
+      if: success()
+      run: |
+        echo "📊 Infrastructure Outputs:"
+        terraform output -json > outputs.json
+        terraform output
+      
+    - name: Upload Outputs
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-outputs
+        path: infra/outputs.json
+        retention-days: 7
+    
+    - name: Deployment Summary
+      if: success()
+      run: |
+        echo "## 🎉 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📦 Instance Details:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Name:** ${{ github.event.inputs.instance_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Type:** ${{ github.event.inputs.instance_size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment:** ${{ github.event.inputs.instance_env }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **AMI:** ${{ github.event.inputs.instance_os }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔧 Terraform Outputs:" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        terraform output >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY

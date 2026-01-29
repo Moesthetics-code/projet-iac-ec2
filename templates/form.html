@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer une Instance EC2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .logo {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 2px solid #e1e8ed;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input::placeholder {
+            color: #adb5bd;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #0c5460;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">☁️</div>
+            <h2>PROJET IAC SONATEL</h2>
+            <p>Création d'instance EC2 automatisée</p>
+        </div>
+
+        <div class="info-box">
+            ℹ️ <strong>Information:</strong> Le déploiement prend environ 2-3 minutes après soumission.
+        </div>
+
+        <form method="post" action="/trigger" id="ec2Form">
+            <div class="form-group">
+                <label for="instance_name">
+                    Nom de l'instance <span class="required">*</span>
+                </label>
+                <input 
+                    id="instance_name" 
+                    name="instance_name" 
+                    placeholder="Ex: serveur-web-prod" 
+                    required
+                    pattern="[a-zA-Z0-9-_]+"
+                    title="Utilisez uniquement des lettres, chiffres, tirets et underscores"
+                    maxlength="50"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="instance_os">
+                    Système d'exploitation <span class="required">*</span>
+                </label>
+                <select id="instance_os" name="instance_os" required>
+                    <option value="">-- Choisir une image --</option>
+                    <option value="ami-05fcfb9614772f051">🐧 Amazon Linux 2</option>
+                    <option value="ami-01f23391a59163da9">🐧 Ubuntu 22.04 LTS</option>
+                    <option value="ami-0548d28d4f7ec72c5">🐧 Debian 12 (Bookworm)</option>
+                    <option value="ami-0989038dff76173d3">🎩 Red Hat Enterprise Linux 9</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="instance_os">
+                    Système d'exploitation <span class="required">*</span>
+                </label>
+                <select id="instance_os" name="instance_os" required>
+                    <option value="">-- Choisir une image --</option>
+                    <option value="ami-0d421d84814b7d51c">🐧 Amazon Linux 2023 (Recommandé)</option>
+                    <option value="ami-0d64bb532e0502c46">🐧 Ubuntu 22.04 LTS</option>
+                    <option value="ami-0c38b837cd80aacf8">🐧 Debian 12</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="instance_env">
+                    Environnement <span class="required">*</span>
+                </label>
+                <select id="instance_env" name="instance_env" required>
+                    <option value="">-- Choisir l'environnement --</option>
+                    <option value="dev">🔧 Développement</option>
+                    <option value="preprod">🧪 Préproduction</option>
+                    <option value="prod">🚀 Production</option>
+                </select>
+            </div>
+
+            <button type="submit">
+                🚀 Lancer l'instance
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Validation côté client
+        document.getElementById('ec2Form').addEventListener('submit', function(e) {
+            const name = document.getElementById('instance_name').value;
+            const os = document.getElementById('instance_os').value;
+            const size = document.getElementById('instance_size').value;
+            const env = document.getElementById('instance_env').value;
+
+            if (!name || !os || !size || !env) {
+                e.preventDefault();
+                alert('⚠️ Veuillez remplir tous les champs obligatoires');
+                return false;
+            }
+
+            // Confirmation pour la production
+            if (env === 'prod') {
+                if (!confirm('⚠️ Vous êtes sur le point de créer une instance en PRODUCTION. Êtes-vous sûr ?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+
+            // Afficher un message de chargement
+            const button = this.querySelector('button');
+            button.innerHTML = '⏳ Déploiement en cours...';
+            button.disabled = true;
+        });
+    </script>
+</body>
+</html>
